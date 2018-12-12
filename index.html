@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Desperdicômetro RU</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+</head>
+
+<script>
+  var dia = new Date();
+  var date = dia.getTime();
+  var width = 0;
+  var weight = 0;
+	console.log(date);
+  function move() {
+      var elem = document.getElementById("barra");
+      var kig = document.getElementById("kg");
+      var img = document.getElementById("img");
+      //var img2 = document.getElementById("img2");
+      var id = setInterval(frame, 10); // testar 10
+
+      function frame() {
+        console.log(width);
+        if (width >= 100) {
+          elem.style.width = 100 + '%';
+          elem.innerHTML = 100 + '%';
+          img.innerHTML='<img src="images/chickensad2.png">';
+          clearInterval(id);
+        } else {
+          //width++;
+          elem.style.width = width + '%';
+          elem.innerHTML = width + '%';
+          img.innerHTML='<img src="images/chickenhappy0.png">';
+          // Coloca o tanto de comida por bandeja desperdiçada
+          //kg.innerHTML = 'Quantidade de alimento desperdiçado por bandeja até agora: ' + width + ' g';
+        }
+      }
+
+  }
+
+	function fetch() {
+		$.ajax({
+			url: "http://7t757n800mj9:gpfX4ibuAu8b@data.demo.konkerlabs.net/sub/7t757n800mj9/weight?waitTime=10000&offset=" + (date+1),
+			type: "GET",
+			dataType: 'jsonp',
+			success: function(data, textStatus, XMLHttpRequest) {
+				console.log(data);
+				update(data);
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+			console.log("Error!");
+			}
+		});
+	}
+
+  function update(data) {
+    if (data.length > 0) {
+		date = data[data.length-1]['meta']['timestamp'];
+		weight = data[data.length-1]['data']['value'];
+		console.log(date, width);
+		width = width + weight;
+		move();
+	}
+    setTimeout(fetch, 1000);
+  }
+
+  setTimeout(fetch, 1000);
+</script>
+
+<style>
+body,h1,h2,h3,h4,h5,h6 {
+    font-family: "Lato", sans-serif
+}
+.w3-bar,h1,button {
+    font-family: "Montserrat", sans-serif
+}
+.fa-anchor,.fa-coffee {
+    font-size:200px
+}
+span{
+   margin: 10px;
+}
+
+.progress{
+  margin-top: 60px;
+  width: 60%;
+  align: left;
+}
+.none {border-style: none;}
+.margin2{margin-left:auto;margin-right:130px}
+
+.progress .bar {
+    -webkit-transition: width 2s ease-in-out;
+    -moz-transition: width 2s ease-in-out;
+    -ms-transition: width 2s ease-in-out;
+    -o-transition: width 2s ease-in-out;
+    transition: width 2s ease-in-out;
+}
+</style>
+
+<body onload="move()">
+
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar w3-light-green w3-card w3-left-align w3-large">
+    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-red" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+    <a href="#" class="w3-bar-item w3-button w3-padding-large w3-white">Home</a>
+    <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Projeto Smart Campus</a>
+  </div>
+
+  <!-- Navbar on small screens -->
+  <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-large">
+    <a href="#" class="w3-bar-item w3-button w3-padding-large">Desperdicômetro</a>
+    <a href="http://smartcampus.prefeitura.unicamp.br/" class="w3-bar-item w3-button w3-padding-large">Projeto Smart Campus</a>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="w3-container w3-green w3-center" style="padding:50px 16px">
+    <h1 class="w3-margin w3-xxxlarge">DESPERDIÇÔMETRO</h1>
+    <h2 class="w3-margin w3-large">Utilizando IoT para medir o desperdício de comida no Restaurante Universitário</h2>
+
+    <div id="resultado"></div>
+
+    <div class="w3-content">
+        <div class="w3-third" id="img">
+          <!--<img src="images/chickensad2.png" id="img1" style="display: none">-->
+		  <img src="images/chickenhappy0.png" id="img2">
+        </div>
+
+        <div class="progress w3-twothird">
+            <div class="progress-bar progress-bar-danger progress-bar-striped active" role="progressbar" id="barra">10%
+            </div>
+		</div>
+
+    </div>
+
+</header>
+
+<!-- First Grid -->
+<div class="w3-row-padding w3-padding-64 w3-panel">
+  <div class="margin2">
+    <div class="w3-twothird w3-center">
+        <iframe class="none" src="mc855-plot.html" height="400px" width="90%"></iframe>
+    </div>
+
+    <div class="w3-third w3-center" align="left">
+        <h1 style="text-align:center;">Você Sabia?</h1>
+        <h5 class="w3-padding-32" style="text-align:justify;">Segundo estimativas recentes, o desperdício de alimentos no Brasil atinge a marca de 70 mil toneladas por dia, sendo isso equivalente a um valor de R$12 bilhões reais gastos no processo produtivo em um ano.</h5>
+
+        <p class="w3-text-grey" style="text-align:justify;">No contexto da Unicamp, os valores de desperdício também são alarmantes. Em 2017, a quantidade de alimentos desperdiçados pelo restaurante universitário somou um valor de 556 kg, equivalente a 14% do valor total produzido, 3850 kg. Nesse ano de 2018, apenas no primeiro semestre a quantidade de alimentos desperdiçados já alcançou a soma de 494 kg, quase 90% do desperdício durante todo o ano de 2017.</p>
+
+    </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Second Grid -->
+<div class="w3-row-padding w3-light-grey w3-padding-64 w3-container">
+  <div class="w3-content">
+    <div class="w3-third" align="center" style=" vertical-align: middle">
+		<a href="#"><img src="images/smart-campus.png"></a>
+		<div style="text-align:center; color:#000000;">Projeto Smart Campus</div>
+    </div>
+    <div class="w3-third" align="center" style=" vertical-align: middle">
+		<a href="#"><img src="images/konker.png"></a>
+		<div style="text-align:center; color:#000000;">Konker</div>
+    </div>
+    <div class="w3-third" align="center" style=" vertical-align: middle">
+		<a href="#"><img src="images/ic.png"></a>
+		<div style="text-align:center; color:#000000;">Instituto de Computação</div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="w3-container w3-padding-64 w3-center w3-opacity">
+  <div class="w3-xlarge w3-padding-32">
+    ESPAÇO 4
+  </div>
+</footer>
+
+<script>
+// Used to toggle the menu on small screens when clicking on the menu button
+function myFunction() {
+
+}
+</script>
+
+</body>
+</html>
